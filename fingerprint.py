@@ -1,17 +1,18 @@
 #!/usr/bin/python
 
-# Trax python script
+# Trax python script to print fingerprint of .mp3 track
 
 import sys
 
 from pyechonest import config
 from pyechonest import track
+
 config.ECHO_NEST_API_KEY="1CTQFDPWDNNGNIYR3"
 
 def fingerprint(file):
   t = track.track_from_filename(file)
-  # t.get_analysis()
-  # print "Fingerprint:",   t.echoprintstring
+  t.get_analysis()
+  print "Fingerprint:",   t.echoprintstring
   print "Acousticness:",  t.acousticness
   print "Danceability:",  t.danceability
   print "Energy:",        t.energy
