@@ -55,11 +55,18 @@ def neural_network(input_data):
   print "First sample (input, target, class):"
   print trndata['input'][0], trndata['target'][0], trndata['class'][0]
 
-# normalization function
-# x is data, minX is minimum values in each column and maxX is maximum values in each column
-# output will be between 0 and 1
-def normalize(x, minX, maxX): 
-  return float(x - minX) / float(maxX - minX)
+  # build neural network
+  fnn = buildNetwork(trndata.indim, 5, trndata.outdim, outclass=SoftmaxLayer)
+  trainer = BackpropTrainer( fnn, dataset=trndata, momentum=0.1, verbose=True, weightdecay=0.01)
+
+  for i in range(100):
+    trainer.trainEpochs(1)
+    trnresult = percentError(trainer.testOnClassData(), trndata['class'])
+    tstresult = percentError(trainer.testOnClassData(dataset=tstdata), tstdata['class'])
+
+    print "epoch: %4d" % trainer.totalepochs, "  train error: %5.2f%%" % trnresult, "  test error: %5.2f%%" % tstresult
+
+
 
 # Main function
 if __name__ == "__main__":
