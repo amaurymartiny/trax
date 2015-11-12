@@ -23,7 +23,7 @@ def read_csv(csv_file):
     for i in range(20 * k, 20 * (k + 1)):
 
       # # normalize the parameter if user likes or not the song
-      # user_data[i][3] = normalize(int(user_data[i][3]), 1, 5) # user likes are between 1 (hate) and 5 (love)
+      # user_data[i][3] = normalize(int(user_data[i][3]), 0, 4) # user likes are between 0 (hate) and 4 (love)
 
       # search for song features in the echonest api
       result = song.search(artist=user_data[i][0], title=user_data[i][1], buckets=['audio_summary'])
