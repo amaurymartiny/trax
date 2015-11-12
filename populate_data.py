@@ -19,11 +19,11 @@ def read_csv(csv_file):
   # we would normally loop over the 100 songs in user_data using for i in range(100)
   # but echonest only allows 20 request per minute
   # so we do the loop 20 per 20, with a 1 minute pause in between
-  for k in range(5):
+  for k in range(4,5):
     for i in range(20 * k, 20 * (k + 1)):
 
-      # normalize the parameter if user likes or not the song
-      user_data[i][3] = normalize(int(user_data[i][3]), 1, 5) # user likes are between 1 (hate) and 5 (love)
+      # # normalize the parameter if user likes or not the song
+      # user_data[i][3] = normalize(int(user_data[i][3]), 1, 5) # user likes are between 1 (hate) and 5 (love)
 
       # search for song features in the echonest api
       result = song.search(artist=user_data[i][0], title=user_data[i][1], buckets=['audio_summary'])
@@ -43,7 +43,7 @@ def read_csv(csv_file):
       writer = csv.writer(f)
       writer.writerows(user_data)
     if k < 4:
-      time.sleep(80)
+      time.sleep(90)
 
 def neural_network(input):
   print "Neural Network"
