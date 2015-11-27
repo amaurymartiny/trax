@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
-# Trax python script to print fingerprint of .mp3 track
+# Trax python script
+# Print fingerprint of .mp3 track
+# Usage: ./fingerprint.py <audio_file.mp3>
 
 import sys
 
