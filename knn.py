@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
-# Trax python script implementing the kNN algorithm
+# Trax python script
+# Implementing the kNN algorithm (side project)
+# Usage: ./knn.py
 
 import sys
 import math
