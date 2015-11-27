@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
 # Trax python script
+# Given a CSV file with Artist and Title as first two columns,
+# this script will add 9 other columns in the file corresponding to the 9 features we are interested in
+# Usage: ./populate_data songs.csv
 
 import sys
 import csv
@@ -19,7 +22,7 @@ def read_csv(csv_file):
   # we would normally loop over the 100 songs in user_data using for i in range(100)
   # but echonest only allows 20 request per minute
   # so we do the loop 20 per 20, with a 1 minute pause in between
-  for k in range(4,5):
+  for k in range(3,5):
     for i in range(20 * k, 20 * (k + 1)):
 
       # # normalize the parameter if user likes or not the song
@@ -27,6 +30,10 @@ def read_csv(csv_file):
 
       # search for song features in the echonest api
       result = song.search(artist=user_data[i][0], title=user_data[i][1], buckets=['audio_summary'])
+      
+      # Use echonest's exact title if not the case
+      user_data[i][0] = result[0].artist_name
+      user_data[i][1] = result[0].title
 
       # the features we are interested in are the following
       features = ["acousticness", "danceability", "energy", "liveness", "loudness", "mode", "speechiness", "tempo", "valence"]
@@ -38,15 +45,14 @@ def read_csv(csv_file):
           normed_value = normalize(normed_value, 20, 200) # general songs' tempo range from 20 to 200
         user_data[i].append(normed_value)
       print i, user_data[i][0], "-", user_data[i][1]
-    print "Waiting 1 minute for Echonest API."
-    with open("output.csv", "wb") as f:
+    with open("./data/songs_full.csv", "wb") as f:
       writer = csv.writer(f)
       writer.writerows(user_data)
-    if k < 4:
-      time.sleep(90)
 
-def neural_network(input):
-  print "Neural Network"
+    # here is where we wait for 1 minute  
+    if k < 4:
+      print "Waiting 1 minute for Echonest API."
+      time.sleep(90)
 
 # normalization function
 # x is data, minX is minimum values in each column and maxX is maximum values in each column
