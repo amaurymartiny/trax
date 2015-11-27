@@ -1,6 +1,10 @@
 #!/usr/bin/python
 
 # Trax python script
+# Main neural network script
+# Input should be a CSV file with 12 columns:
+# 1. Artist 2. Title 3-11. Features (nine of them) 12. Like/Dislike (between 0 and 4)
+# Usage: ./main.py <user_full.csv>
 
 import sys
 import csv
@@ -9,7 +13,8 @@ from pybrain.datasets            import ClassificationDataSet
 from pybrain.utilities           import percentError
 from pybrain.tools.shortcuts     import buildNetwork
 from pybrain.supervised.trainers import BackpropTrainer
-from pybrain.structure.modules   import SoftmaxLayer
+from pybrain.structure           import FeedForwardNetwork
+from pybrain.structure.modules   import SoftmaxLayer, LinearLayer, SigmoidLayer
 
 def read_csv(csv_file):
   with open(csv_file, 'rb') as f:
@@ -20,18 +25,14 @@ def read_csv(csv_file):
 def neural_network(input_data):
   print "Neural Network"
   print "=============="
-  dataset = ClassificationDataSet(9, 1, nb_classes=5) # 9 is the dimension of the input, 1 i don't know
+  dataset = ClassificationDataSet(9, 1, nb_classes=5) # 9 is the dimension of the input, 1 dimension of the target
   for row in input_data:
     # add all 9 features inside our input tuple
     input_tuple = ()
     for i in range(9):
-      input_tuple += (float(row[i+4]),)
+      input_tuple += (float(row[i+2]),) # features are in columns 3 to 11
     # print float(row[3])
-    dataset.addSample(input_tuple, [int(row[3])])
-
-  # for inpt, target in dataset:
-  #   print inpt, target
-
+    dataset.addSample(input_tuple, [int(row[11])]) # 12th column = last column is the number between 0 and 4 to show if user likes or not the song
 
   # workaround for _convertToOneOfMany
   # http://stackoverflow.com/questions/27887936/attributeerror-using-pybrain-splitwithportion-object-type-changed
@@ -56,16 +57,31 @@ def neural_network(input_data):
   print trndata['input'][0], trndata['target'][0], trndata['class'][0]
 
   # build neural network
-  fnn = buildNetwork(trndata.indim, 5, trndata.outdim, outclass=SoftmaxLayer)
-  trainer = BackpropTrainer( fnn, dataset=trndata, momentum=0.1, verbose=True, weightdecay=0.01)
+  # using shortcut:
+  fnn = buildNetwork(trndata.indim, 3, trndata.outdim, outclass=LinearLayer) #middle number is number of hidden layers
 
+  # train
+  trainer = BackpropTrainer( fnn, dataset=trndata, momentum=0.1, verbose=False, weightdecay=0.01)
+
+  #output_file = open("user1_output.csv", "wb")
+  trnresults = []
+  tstresults = []
   for i in range(100):
-    trainer.trainEpochs(1)
+    trainer.trainEpochs(10)
     trnresult = percentError(trainer.testOnClassData(), trndata['class'])
     tstresult = percentError(trainer.testOnClassData(dataset=tstdata), tstdata['class'])
 
-    print "epoch: %4d" % trainer.totalepochs, "  train error: %5.2f%%" % trnresult, "  test error: %5.2f%%" % tstresult
+    print "train error: %5.2f%%" % trnresult, "  test error: %5.2f%%" % tstresult
 
+    trnresults.append(trnresult)
+    tstresults.append(tstresult)
+    #output_file.write("%5.2f,%5.2f\n" % (trnresult, tstresult))
+
+  #output_file.close()
+
+  # print mean 
+  print "Train error mean:", sum(trnresults)/float(len(trnresults))
+  print "Test error mean:", sum(tstresults)/float(len(tstresults))
 
 
 # Main function
