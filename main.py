@@ -58,7 +58,7 @@ def neural_network(input_data):
 
   # build neural network
   # using shortcut:
-  fnn = buildNetwork(trndata.indim, 3, trndata.outdim, hiddenclass=LinearLayer, outclass=SoftmaxLayer) #middle number is number of hidden layers
+  fnn = buildNetwork(trndata.indim, 3, trndata.outdim, hiddenclass=LinearLayer, outclass=SoftmaxLayer, bias=True) #middle number is number of hidden layers
 
   # train
   trainer = BackpropTrainer( fnn, dataset=trndata, momentum=0.1, verbose=False, weightdecay=0.01)
