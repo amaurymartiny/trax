@@ -13,7 +13,7 @@ from pybrain.datasets            import ClassificationDataSet
 from pybrain.utilities           import percentError
 from pybrain.tools.shortcuts     import buildNetwork
 from pybrain.supervised.trainers import BackpropTrainer
-from pybrain.structure           import FeedForwardNetwork
+from pybrain.structure           import FeedForwardNetwork, FullConnection, BiasUnit
 from pybrain.structure.modules   import SoftmaxLayer, LinearLayer, SigmoidLayer, TanhLayer
 
 def read_csv(csv_file):
@@ -40,16 +40,16 @@ def neural_network(input_data):
   
   tstdata = ClassificationDataSet(9, 1, nb_classes=5)
   for n in xrange(0, tstdata_temp.getLength()):
-      tstdata.addSample( tstdata_temp.getSample(n)[0], tstdata_temp.getSample(n)[1] )
+    tstdata.addSample( tstdata_temp.getSample(n)[0], tstdata_temp.getSample(n)[1] )
 
   trndata = ClassificationDataSet(9, 1, nb_classes=5)
   for n in xrange(0, trndata_temp.getLength()):
-      trndata.addSample( trndata_temp.getSample(n)[0], trndata_temp.getSample(n)[1] )
+     trndata.addSample( trndata_temp.getSample(n)[0], trndata_temp.getSample(n)[1] )
 
   # instead of 1 dimension of 5 classes, we use 5 target neurons
   # http://pybrain.org/docs/tutorial/fnn.html
-  trndata._convertToOneOfMany( )
-  tstdata._convertToOneOfMany( )
+  trndata._convertToOneOfMany()
+  tstdata._convertToOneOfMany()
 
   print "Number of training patterns: ", len(trndata)
   print "Input and output dimensions: ", trndata.indim, trndata.outdim
@@ -58,7 +58,44 @@ def neural_network(input_data):
 
   # build neural network
   # using shortcut:
-  fnn = buildNetwork(trndata.indim, 3, trndata.outdim, hiddenclass=LinearLayer, outclass=SoftmaxLayer, bias=True) #middle number is number of hidden layers
+  #fnn = buildNetwork(trndata.indim, 5, trndata.outdim, hiddenclass=TanhLayer, outclass=LinearLayer, bias=True) #middle number is number of hidden layers
+
+  # construct blank network
+  fnn = FeedForwardNetwork()
+
+  # add layers
+  fnn.addInputModule(LinearLayer(9, name="in"))
+  fnn.addModule(SigmoidLayer(12, name="hidden1"))
+  fnn.addModule(SigmoidLayer(12, name="hidden2"))
+  fnn.addModule(SigmoidLayer(12, name="hidden3"))
+  fnn.addOutputModule(LinearLayer(5, name="out"))
+
+  # add bias
+  bias = BiasUnit(name='bias')
+  fnn.addModule(bias)
+
+  # add connections
+  in_to_hidden1 = FullConnection(fnn['in'], fnn['hidden1'])
+  hidden1_to_hidden2 = FullConnection(fnn['hidden1'], fnn['hidden2'])
+  hidden1_to_bias = FullConnection(fnn['hidden1'], fnn['bias'])
+  bias_to_hidden2 = FullConnection(fnn['bias'], fnn['hidden2'])
+  hidden2_to_hidden3 = FullConnection(fnn['hidden2'], fnn['hidden3'])
+  hidden3_to_bias = FullConnection(fnn['hidden3'], fnn['bias'])
+  bias_to_out = FullConnection(fnn['bias'], fnn['out'])
+  hidden3_to_out = FullConnection(fnn['hidden3'], fnn['out'])
+
+  fnn.addConnection(in_to_hidden1)
+  fnn.addConnection(hidden1_to_hidden2)
+  #fnn.addConnection(hidden1_to_bias)
+  #fnn.addConnection(bias_to_hidden2)
+  fnn.addConnection(hidden2_to_hidden3)
+  fnn.addConnection(hidden3_to_out)
+  #fnn.addConnection(hidden3_to_bias)
+  #fnn.addConnection(bias_to_out)
+
+  # final step to prepare nn
+  fnn.sortModules()
+  print fnn
 
   # train
   trainer = BackpropTrainer( fnn, dataset=trndata, momentum=0.1, verbose=False, weightdecay=0.01)
@@ -70,6 +107,7 @@ def neural_network(input_data):
     trainer.trainEpochs(10)
     trnresult = percentError(trainer.testOnClassData(), trndata['class'])
     tstresult = percentError(trainer.testOnClassData(dataset=tstdata), tstdata['class'])
+
 
     print "train error: %5.2f%%" % trnresult, "  test error: %5.2f%%" % tstresult
 
