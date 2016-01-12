@@ -27,6 +27,7 @@ def neural_network(input_data):
   print "=============="
   dataset = ClassificationDataSet(9, 1, nb_classes=5) # 9 is the dimension of the input, 1 dimension of the target
   for row in input_data:
+    print row
     # add all 9 features inside our input tuple
     input_tuple = ()
     for i in range(9):
