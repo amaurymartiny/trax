@@ -25,13 +25,23 @@ def read_csv(csv_file):
 def neural_network(input_data):
   print "Neural Network"
   print "=============="
-  dataset = ClassificationDataSet(9, 1, nb_classes=5) # 9 is the dimension of the input, 1 dimension of the target
+
+  #Features we chose are:
+  #"acousticness", "danceability", "energy", "liveness", "loudness", "mode", "speechiness", "tempo", "valence"
+  #[2,              3,              4,         5          6           7       8               9       10]
+
+  features = [2, 3, 4, 5 ,6, 8, 9, 10] # remove mode
+  dimInput = len(features)
+
+  dataset = ClassificationDataSet(dimInput, 1, nb_classes=5) # dimInput is the dimension of the input, 1 dimension of the target
   for row in input_data:
-    print row
+
+
+
     # add all 9 features inside our input tuple
     input_tuple = ()
-    for i in range(9):
-      input_tuple += (float(row[i+2]),) # features are in columns 3 to 11
+    for i in features:
+      input_tuple += (float(row[i]),) # features are in columns 3 to 11
     # print float(row[3])
     dataset.addSample(input_tuple, [int(row[11])]) # 12th column = last column is the number between 0 and 4 to show if user likes or not the song
 
@@ -39,11 +49,11 @@ def neural_network(input_data):
   # http://stackoverflow.com/questions/27887936/attributeerror-using-pybrain-splitwithportion-object-type-changed
   tstdata_temp, trndata_temp = dataset.splitWithProportion(0.3)
   
-  tstdata = ClassificationDataSet(9, 1, nb_classes=5)
+  tstdata = ClassificationDataSet(dimInput, 1, nb_classes=5)
   for n in xrange(0, tstdata_temp.getLength()):
     tstdata.addSample( tstdata_temp.getSample(n)[0], tstdata_temp.getSample(n)[1] )
 
-  trndata = ClassificationDataSet(9, 1, nb_classes=5)
+  trndata = ClassificationDataSet(dimInput, 1, nb_classes=5)
   for n in xrange(0, trndata_temp.getLength()):
      trndata.addSample( trndata_temp.getSample(n)[0], trndata_temp.getSample(n)[1] )
 
@@ -65,7 +75,7 @@ def neural_network(input_data):
   fnn = FeedForwardNetwork()
 
   # add layers
-  fnn.addInputModule(LinearLayer(9, name="in"))
+  fnn.addInputModule(LinearLayer(dimInput, name="in"))
   fnn.addModule(SigmoidLayer(12, name="hidden1"))
   fnn.addModule(SigmoidLayer(12, name="hidden2"))
   fnn.addModule(SigmoidLayer(12, name="hidden3"))
