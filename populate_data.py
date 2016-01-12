@@ -22,7 +22,7 @@ def read_csv(csv_file):
   # we would normally loop over the 100 songs in user_data using for i in range(100)
   # but echonest only allows 20 request per minute
   # so we do the loop 20 per 20, with a 1 minute pause in between
-  for k in range(3,5):
+  for k in range(0,5):
     for i in range(20 * k, 20 * (k + 1)):
 
       # # normalize the parameter if user likes or not the song
