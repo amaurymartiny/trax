@@ -30,7 +30,7 @@ def neural_network(input_data):
   #"acousticness", "danceability", "energy", "liveness", "loudness", "mode", "speechiness", "tempo", "valence"
   #[2,              3,              4,         5          6           7       8               9       10]
 
-  features = [2, 3, 4, 5 ,6, 8, 10] # remove mode
+  features = [2, 3, 4, 5 ,6, 8, 9, 10] # remove mode
   dimInput = len(features)
 
   dataset = ClassificationDataSet(dimInput, 1, nb_classes=5) # dimInput is the dimension of the input, 1 dimension of the target
@@ -73,34 +73,35 @@ def neural_network(input_data):
   fnn = FeedForwardNetwork()
 
   # add layers
-  fnn.addInputModule(LinearLayer(dimInput, name="in"))
-  fnn.addModule(SigmoidLayer(124, name="hidden1"))
-  fnn.addModule(SigmoidLayer(124, name="hidden2"))
-  fnn.addModule(SigmoidLayer(124, name="hidden3"))
-  fnn.addOutputModule(LinearLayer(5, name="out"))
+  fnn.addInputModule(TanhLayer(dimInput, name="in"))
+  fnn.addModule(TanhLayer(24, name="hidden1"))
+  fnn.addModule(TanhLayer(24, name="hidden2"))
+  fnn.addModule(TanhLayer(24, name="hidden3"))
+  fnn.addOutputModule(TanhLayer(5, name="out"))
 
   # add bias
   bias = BiasUnit(name='bias')
   fnn.addModule(bias)
 
   # add connections
-  in_to_hidden1 = FullConnection(fnn['in'], fnn['hidden1'])
-  bias_to_hidden1 = FullConnection(fnn['bias'], fnn['hidden1'])
-  hidden1_to_hidden2 = FullConnection(fnn['hidden1'], fnn['hidden2'])
-  bias_to_hidden2 = FullConnection(fnn['bias'], fnn['hidden2'])
-  hidden2_to_hidden3 = FullConnection(fnn['hidden2'], fnn['hidden3'])
-  bias_to_hidden3 = FullConnection(fnn['bias'], fnn['hidden3'])
-  hidden3_to_out = FullConnection(fnn['hidden3'], fnn['out'])
+  in_to_hidden1       = FullConnection(fnn['in'], fnn['hidden1'])
+  bias_to_hidden1     = FullConnection(fnn['bias'], fnn['hidden1'])
+  hidden1_to_out      = FullConnection(fnn['hidden1'], fnn['out'])
+  hidden1_to_hidden2  = FullConnection(fnn['hidden1'], fnn['hidden2'])
+  bias_to_hidden2     = FullConnection(fnn['bias'], fnn['hidden2'])
+  hidden2_to_hidden3  = FullConnection(fnn['hidden2'], fnn['hidden3'])
+  hidden2_to_out      = FullConnection(fnn['hidden2'], fnn['out'])
+  bias_to_hidden3     = FullConnection(fnn['bias'], fnn['hidden3'])
+  hidden3_to_out      = FullConnection(fnn['hidden3'], fnn['out'])
 
   fnn.addConnection(in_to_hidden1)
   fnn.addConnection(bias_to_hidden1)
   fnn.addConnection(hidden1_to_hidden2)
   fnn.addConnection(bias_to_hidden2)
-  fnn.addConnection(hidden2_to_hidden3)
-  fnn.addConnection(bias_to_hidden3)
-  fnn.addConnection(hidden3_to_out)
-  #fnn.addConnection(hidden3_to_bias)
-  #fnn.addConnection(bias_to_out)
+  #fnn.addConnection(hidden2_to_hidden3)
+  #fnn.addConnection(bias_to_hidden3)
+  #fnn.addConnection(hidden3_to_out)
+  fnn.addConnection(hidden2_to_out)
 
   # final step to prepare nn
   fnn.sortModules()
